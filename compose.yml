@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: liste-courses-app
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./app/listecourses_Eoten_Romain:/app/listecourses_Eoten_Romain
+      - ./app/listecourses_Eoten_Romain/database.db:/app/listecourses_Eoten_Romain/database.db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
