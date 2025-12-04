@@ -1,26 +1,15 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: ./docker/php/Dockerfile
-    container_name: liste-courses-app
-    ports:
-      - "8765:8765"
-    volumes:
-      - ./app/listecourses_Eoten_Romain:/app/listecourses_Eoten_Romain
-    depends_on:
-      mariadb:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - app-network
-    env_file:
-      - .env
-
   mariadb:
     image: mariadb:latest
     container_name: liste-courses-mariadb
     restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_CHARSET: utf8mb4
+      MARIADB_COLLATE: utf8mb4_unicode_ci
     ports:
       - "${MARIADB_PORT}:3306"
     volumes:
@@ -31,8 +20,6 @@ services:
       test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
-    env_file:
-      - .env
 
 networks:
   app-network:
