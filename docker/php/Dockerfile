@@ -1,27 +1,39 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-apache
 
-LABEL maintainer="Eoten FRERE <eotenfrere@gmail.com>"
-
-RUN apk add --no-cache \
-    bash \
-    git \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libzip-dev \
     unzip \
-    sqlite-dev \
-    icu-dev \
-    oniguruma-dev
+    zip \
+    netcat-openbsd \
+    && docker-php-ext-install \
+    intl \
+    pdo_mysql \
+    zip \
+    && a2enmod rewrite
 
-RUN docker-php-ext-install pdo pdo_sqlite intl mbstring
+# Set working directory
+WORKDIR /var/www/html
 
-RUN curl -sS https://getcomposer.org/installer | php \
-    -- --install-dir=/usr/local/bin --filename=composer
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app/listecourses_Eoten_Romain
+# Copy Application Code (Adjusted path for build context)
+# If build context is root, this is still app/...
+# If build context is docker/php, we need to go up? Docker doesn't allow going up from context.
+# So context MUST be root.
+COPY app/listecourses_Eoten_Romain /var/www/html
 
-COPY ./app/listecourses_Eoten_Romain /app/listecourses_Eoten_Romain
+# Copy entrypoint
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN composer install --no-interaction 
+# Configure Apache DocumentRoot
+ENV APACHE_DOCUMENT_ROOT /var/www/html/webroot
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-EXPOSE 8765
-
-CMD ["php", "-S", "0.0.0.0:8765", "-t", "webroot"]
-
+# Set entrypoint
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["apache2-foreground"]
