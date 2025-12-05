@@ -1,8 +1,6 @@
 # app #
 ##########################
-app/*
-app/listecourses_Eoten_Romain/
-app/listecourses_Eoten_Romain/*
+app/
 
 # OS generated files #
 ######################
