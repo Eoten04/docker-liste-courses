@@ -1,8 +1,0 @@
-services:
-  app:
-    volumes:
-      - ./app/listecourses_Eoten_Romain:/var/www/html
-    command: sh -c "composer install && apache2-foreground"
-    environment:
-      - APP_ENV=dev
-      - DEBUG=true

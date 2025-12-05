@@ -1,9 +1,0 @@
-services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-    command: sh -c "composer install --no-dev --optimize-autoloader && apache2-foreground"
-    environment:
-      - APP_ENV=prod
-      - DEBUG=false
